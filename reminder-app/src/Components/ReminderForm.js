@@ -1,30 +1,44 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { UserContext } from './UserContext';
 import Cookies from 'js-cookie';
 
-const ReminderForm = () => {
-  const { user } = useContext(UserContext);
+const ReminderForm = ({ user }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [type, setType] = useState('day');
-  const [location, setLocation] = useState({ latitude: null, longitude: null });
+  const [location, setLocation] = useState({ address: '' });
+  const [repeatInterval, setRepeatInterval] = useState('');
+  const [notificationType, setNotificationType] = useState('none');
+  const [notificationTimeBefore, setNotificationTimeBefore] = useState('');
+  const [tags, setTags] = useState([]);
+  const [sharedWith, setSharedWith] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  const handleLocation = () => {
-    navigator.geolocation.getCurrentPosition((position) => {
-      setLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      });
-    });
-  };
+  useEffect(() => {
+    // Fetch all registered users
+    const fetchUsers = async () => {
+      const response = await axios.get('http://localhost:5000/u/users');
+      setUsers(response.data);
+    };
+    fetchUsers();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const userId = user?.userId || Cookies.get('userId').replace(/^j:/, '').replace(/"/g, ''); 
-    const reminder = { userId, title, description, startDate, endDate, type, location };
+    const reminder = { 
+      userId, 
+      title, 
+      description, 
+      startDate, 
+      endDate, 
+      location, 
+      repeatInterval, 
+      notification: { type: notificationType === 'none' ? null : notificationType, timeBefore: notificationTimeBefore },
+      tags,
+      sharedWith
+    };
     await axios.post('http://localhost:5000/r/reminders', reminder);
   };
 
@@ -47,18 +61,40 @@ const ReminderForm = () => {
         <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
       </div>
       <div className="form-group">
-        <label>Type</label>
-        <select value={type} onChange={(e) => setType(e.target.value)} required>
-          <option value="month">Month</option>
-          <option value="week">Week</option>
-          <option value="day">Day</option>
-          <option value="time-limited">Time-limited</option>
+        <label>Location</label>
+        <input type="text" value={location.address} onChange={(e) => setLocation({ address: e.target.value })} />
+      </div>
+      <div className="form-group">
+        <label>Repeat Interval</label>
+        <input type="text" value={repeatInterval} onChange={(e) => setRepeatInterval(e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label>Notification Type</label>
+        <select value={notificationType} onChange={(e) => setNotificationType(e.target.value)}>
+          <option value="none">None</option>
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="push">Push</option>
         </select>
       </div>
       <div className="form-group">
-        <button type="button" onClick={handleLocation}>Get Location</button>
+        <label>Notification Time Before (minutes)</label>
+        <input type="number" value={notificationTimeBefore} onChange={(e) => setNotificationTimeBefore(e.target.value)} />
       </div>
-      <button type="submit">Create Reminder</button>
+      <div className="form-group">
+        <label>Tags</label>
+        <input type="text" value={tags.join(', ')} onChange={(e) => setTags(e.target.value.split(',').map(tag => tag.trim()))} />
+      </div>
+      <div className="form-group">
+        <label>Shared With</label>
+        <select value={sharedWith} onChange={(e) => setSharedWith([e.target.value])}>
+          <option value="">Select a user</option>
+          {users.map(user => (
+            <option key={user._id} value={user._id}>{user.username}</option>
+          ))}
+        </select>
+      </div>
+      <button type="submit" className="btn btn-primary">Create Reminder</button>
     </form>
   );
 };

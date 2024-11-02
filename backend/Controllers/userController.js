@@ -39,3 +39,22 @@ exports.login = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+exports.listAllUsernames = async (req, res) => {
+  try {
+    const users = await User.find({}, 'username');
+    res.json(users);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
+exports.getUserUsername = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId, 'username');
+    res.json(user);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  };
+};

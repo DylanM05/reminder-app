@@ -29,3 +29,13 @@ exports.updateReminder = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+// get shared reminders by username
+exports.getSharedReminders = async (req, res) => {
+  try {
+    const reminders = await Reminder.find({ sharedWith: req.params.userId });
+    res.json(reminders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

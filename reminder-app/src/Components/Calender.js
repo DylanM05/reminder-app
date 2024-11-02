@@ -38,31 +38,56 @@ const Calendar = () => {
 
   useEffect(() => {
     const fetchReminders = async () => {
-      if (user?.userId) { 
+      if (user?.userId) {
         try {
-          const response = await axios.get(`http://localhost:5000/r/reminders/${user.userId}`, { withCredentials: true });
-          console.log("Fetched reminders:", response.data);  
 
-          const reminders = response.data.map(reminder => ({
+          // Fetch the user's reminders
+          const remindersResponse = await axios.get(`http://localhost:5000/r/reminders/${user.userId}`, { withCredentials: true });
+          console.log("Fetched reminders:", remindersResponse.data);
+
+
+          // Fetch the user's username
+         const userResponse = await axios.get(`http://localhost:5000/u/user/${user.userId}`, { withCredentials: true });
+         const username = userResponse.data.username;
+         console.log("Fetched username:", username);
+  
+  
+          // Fetch the shared reminders
+         
+          const sharedRemindersResponse = await axios.get(`http://localhost:5000/r/reminders/shared/${user.userId}`, { withCredentials: true });
+          console.log("Fetched shared reminders:", sharedRemindersResponse.data);
+        
+  
+          // Combine the reminders and shared reminders
+          const reminders = remindersResponse.data.map(reminder => ({
             id: reminder._id,
             title: reminder.title,
             start: new Date(reminder.startDate),
             end: reminder.endDate ? new Date(reminder.endDate) : new Date(reminder.startDate),
             allDay: reminder.type === 'day' || reminder.type === 'month',
           }));
-          setEvents(reminders);
+  
+       
+          const sharedReminders = sharedRemindersResponse.data.map(reminder => ({
+            id: reminder._id,
+            title: reminder.title,
+            start: new Date(reminder.startDate),
+            end: reminder.endDate ? new Date(reminder.endDate) : new Date(reminder.startDate),
+            allDay: reminder.type === 'day' || reminder.type === 'month',
+          }));
+       
+  
+          setEvents([...reminders , ...sharedReminders]);
+          setLoading(false); // Set loading to false after fetching reminders
         } catch (error) {
-          console.error('Error fetching reminders:', error);
-        } finally {
-          setLoading(false);
+          console.error("Error fetching reminders:", error);
+          setLoading(false); // Set loading to false even if there is an error
         }
       }
     };
 
-    if (user && user.userId && loading) {
-      fetchReminders();
-    }
-  }, [user, loading]);
+    fetchReminders();
+  }, [user]);
 
   if (loading) return <div>Loading reminders...</div>;
 

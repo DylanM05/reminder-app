@@ -7,10 +7,15 @@ const reminderSchema = new mongoose.Schema({
   startDate: { type: Date, required: true },
   endDate: { type: Date },
   location: {
-    latitude: Number,
-    longitude: Number,
+    address: { type: String, required: false }
   },
-  type: { type: String, enum: ['month', 'week', 'day', 'time-limited'], required: true }
+  repeatInterval: { type: String, required: false },
+  notification: {
+    type: { type: String, enum: ['email', 'sms', 'push'], required: false },
+    timeBefore: { type: Number, required: false } // in minutes
+  },
+  tags: [{ type: String, required: false }],
+  sharedWith: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false }]
 });
 
 module.exports = mongoose.model('Reminder', reminderSchema);

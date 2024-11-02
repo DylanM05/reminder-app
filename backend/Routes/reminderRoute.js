@@ -11,4 +11,7 @@ router.get('/reminders/:userId', reminderController.getReminders);
 // Update a reminder
 router.put('/reminders/:id', reminderController.updateReminder);
 
+// get shared reminders
+router.get('/reminders/shared/:userId', reminderController.getSharedReminders);
+
 module.exports = router;

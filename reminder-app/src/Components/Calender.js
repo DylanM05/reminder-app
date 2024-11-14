@@ -44,20 +44,8 @@ const Calendar = () => {
           // Fetch the user's reminders
           const remindersResponse = await axios.get(`http://localhost:5000/r/reminders/${user.userId}`, { withCredentials: true });
           console.log("Fetched reminders:", remindersResponse.data);
-
-
-          // Fetch the user's username
-         const userResponse = await axios.get(`http://localhost:5000/u/user/${user.userId}`, { withCredentials: true });
-         const username = userResponse.data.username;
-         console.log("Fetched username:", username);
-  
-  
           // Fetch the shared reminders
-         
           const sharedRemindersResponse = await axios.get(`http://localhost:5000/r/reminders/shared/${user.userId}`, { withCredentials: true });
-          console.log("Fetched shared reminders:", sharedRemindersResponse.data);
-        
-  
           // Combine the reminders and shared reminders
           const reminders = remindersResponse.data.map(reminder => ({
             id: reminder._id,

@@ -13,7 +13,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Ensure the directories exist before trying to install dependencies
                     if (fileExists('frontend/package.json')) {
                         bat 'cd frontend && npm install'
                     }
@@ -27,12 +26,18 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Run tests for frontend and backend separately
+                    // Test frontend if exists
                     if (fileExists('frontend/package.json')) {
                         bat 'cd frontend && npm test -- --coverage'
                     }
+                    // Test backend if package.json contains test script
                     if (fileExists('backend/package.json')) {
-                        bat 'cd backend && npm test -- --coverage'
+                        def packageJson = readFile('backend/package.json')
+                        if (packageJson.contains('"test"')) {
+                            bat 'cd backend && npm test -- --coverage'
+                        } else {
+                            echo "No tests in backend to run."
+                        }
                     }
                 }
             }

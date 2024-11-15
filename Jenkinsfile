@@ -2,11 +2,13 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/DylanM05/reminder-app'
-            }
+stage('Checkout') {
+    steps {
+        script {
+            git branch: 'main', url: 'https://github.com/DylanM05/reminder-app'
         }
+    }
+}
         stage('Build') {
             steps {
                 sh 'npm install'

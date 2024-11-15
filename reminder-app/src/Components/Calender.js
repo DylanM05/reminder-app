@@ -75,12 +75,16 @@ const Calendar = () => {
       const userIdsToFetch = [...new Set(sharedRemindersResponse.data.map(r => r.userId))];
       console.log("Unique user IDs to fetch usernames for:", userIdsToFetch);
   
-      // If the batched API call isn't working, we can debug it here.
-      const usernamesResponse = await axios.get('http://localhost:5000/u/users', { userIds: userIdsToFetch });
-      console.log("Fetched usernames:", usernamesResponse.data);
+      // Fetch usernames for shared reminders
+      const usernames = {};
+      for (const userId of userIdsToFetch) {
+        const username = await fetchUsername(userId); // Use fetchUsername
+        usernames[userId] = username;
+      }
+      console.log("Fetched usernames:", usernames);
   
       const sharedReminders = sharedRemindersResponse.data.map(reminder => {
-        const username = usernamesResponse.data[reminder.userId] || 'Unknown User';
+        const username = usernames[reminder.userId] || 'Unknown User';
         return {
           id: reminder._id,
           title: reminder.title,
@@ -92,7 +96,7 @@ const Calendar = () => {
           tags: reminder.tags || [],
           sharedWith: reminder.sharedWith || [],
           creator: reminder.userId,
-          sharedByUsername: username
+          sharedByUsername: username // Set the sharedByUsername field
         };
       });
   
@@ -108,10 +112,11 @@ const Calendar = () => {
     }
   }, [user]);
   
+  
 
   const fetchUsername = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/u/users/${userId}`);
+      const response = await axios.get(`http://localhost:5000/u/user/${userId}`);
       return response.data.username;
     } catch (error) {
       console.error("Error fetching username:", error);

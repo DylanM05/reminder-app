@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import Calendar from './Calender';
 import ReminderForm from './ReminderForm';
 
 function Dashboard() {
   const [show, setShow] = useState(false);
-  const [events, setEvents] = useState([]);
+  const [events] = useState([]);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);

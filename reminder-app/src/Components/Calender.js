@@ -40,7 +40,7 @@ const Calendar = () => {
       setUser({ userId });
       console.log('User ID set from cookie:', userId);
     }
-  }, []); 
+  }, [setUser]); 
 
   const fetchReminders = async () => {
     if (user?.userId) {
@@ -102,7 +102,7 @@ const Calendar = () => {
 
   useEffect(() => {
     fetchReminders();
-  }, [user]);
+  }, [fetchReminders, user]);
 
   const handleClose = () => {
     setShow(false);

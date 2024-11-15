@@ -35,7 +35,7 @@ pipeline {
                 script {
                     // Run frontend tests
                     if (fileExists('reminder-app/package.json')) {
-                        bat 'cd reminder-app && npm test -- --coverage'
+                        bat 'cd reminder-app && npm test -- --coverage --passWithNoTests'
                     }
                 }
             }

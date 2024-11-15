@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import axios from 'axios';
@@ -42,63 +42,83 @@ const Calendar = () => {
     }
   }, [setUser]); 
 
-  const fetchReminders = async () => {
-    if (user?.userId) {
-      try {
-        // Fetch the user's reminders
-        const remindersResponse = await axios.get(`http://localhost:5000/r/reminders/${user.userId}`, { withCredentials: true });
-        console.log("Fetched reminders:", remindersResponse.data);
-        // Fetch the shared reminders
-        const sharedRemindersResponse = await axios.get(`http://localhost:5000/r/reminders/shared/${user.userId}`, { withCredentials: true });
-        // Combine the reminders and shared reminders
-        const reminders = remindersResponse.data.map(reminder => ({
+  const fetchReminders = useCallback(async () => {
+    if (!user?.userId) {
+      console.log("No user ID available for fetching reminders.");
+      return;
+    }
+  
+    try {
+      console.log("Fetching reminders and shared reminders for user ID:", user.userId);
+  
+      const [remindersResponse, sharedRemindersResponse] = await Promise.all([
+        axios.get(`http://localhost:5000/r/reminders/${user.userId}`, { withCredentials: true }),
+        axios.get(`http://localhost:5000/r/reminders/shared/${user.userId}`, { withCredentials: true })
+      ]);
+  
+      console.log("User reminders response:", remindersResponse.data);
+      console.log("Shared reminders response:", sharedRemindersResponse.data);
+  
+      const reminders = remindersResponse.data.map(reminder => ({
+        id: reminder._id,
+        title: reminder.title,
+        start: new Date(reminder.startDate),
+        end: reminder.endDate ? new Date(reminder.endDate) : new Date(reminder.startDate),
+        allDay: reminder.type === 'day' || reminder.type === 'month',
+        location: reminder.location || { address: '' },
+        notification: reminder.notification || { type: 'none', timeBefore: '' },
+        tags: reminder.tags || [],
+        sharedWith: reminder.sharedWith || [],
+        creator: user.userId
+      }));
+  
+      const userIdsToFetch = [...new Set(sharedRemindersResponse.data.map(r => r.userId))];
+      console.log("Unique user IDs to fetch usernames for:", userIdsToFetch);
+  
+      // If the batched API call isn't working, we can debug it here.
+      const usernamesResponse = await axios.get('http://localhost:5000/u/users', { userIds: userIdsToFetch });
+      console.log("Fetched usernames:", usernamesResponse.data);
+  
+      const sharedReminders = sharedRemindersResponse.data.map(reminder => {
+        const username = usernamesResponse.data[reminder.userId] || 'Unknown User';
+        return {
           id: reminder._id,
           title: reminder.title,
           start: new Date(reminder.startDate),
           end: reminder.endDate ? new Date(reminder.endDate) : new Date(reminder.startDate),
           allDay: reminder.type === 'day' || reminder.type === 'month',
-          location: reminder.location || { address: '' }, // Ensure location is defined
-          notification: reminder.notification || { type: 'none', timeBefore: '' }, // Ensure notification is defined
-          tags: reminder.tags || [], // Ensure tags is defined
-          sharedWith: reminder.sharedWith || [], // Ensure sharedWith is defined
-          creator: user.userId // Add creator information
-        }));
-
-        const sharedReminders = await Promise.all(sharedRemindersResponse.data.map(async reminder => {
-          const username = await fetchUsername(reminder.userId);
-          return {
-            id: reminder._id,
-            title: reminder.title,
-            start: new Date(reminder.startDate),
-            end: reminder.endDate ? new Date(reminder.endDate) : new Date(reminder.startDate),
-            allDay: reminder.type === 'day' || reminder.type === 'month',
-            location: reminder.location || { address: '' }, // Ensure location is defined
-            notification: reminder.notification || { type: 'none', timeBefore: '' }, // Ensure notification is defined
-            tags: reminder.tags || [], // Ensure tags is defined
-            sharedWith: reminder.sharedWith || [], // Ensure sharedWith is defined
-            creator: reminder.userId, // Add creator information
-            sharedByUsername: username // Add shared by username
-          };
-        }));
-
-        setEvents([...reminders, ...sharedReminders]);
-        setLoading(false); // Set loading to false after fetching reminders
-      } catch (error) {
-        console.error("Error fetching reminders:", error);
-        setLoading(false); // Set loading to false even if there is an error
-      }
+          location: reminder.location || { address: '' },
+          notification: reminder.notification || { type: 'none', timeBefore: '' },
+          tags: reminder.tags || [],
+          sharedWith: reminder.sharedWith || [],
+          creator: reminder.userId,
+          sharedByUsername: username
+        };
+      });
+  
+      console.log("Processed reminders:", reminders);
+      console.log("Processed shared reminders:", sharedReminders);
+  
+      setEvents([...reminders, ...sharedReminders]);
+      console.log("Events state updated with reminders and shared reminders.");
+    } catch (error) {
+      console.error('Error fetching reminders or shared reminders:', error);
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [user]);
+  
 
   const fetchUsername = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/u/user/${userId}`);
+      const response = await axios.get(`http://localhost:5000/u/users/${userId}`);
       return response.data.username;
     } catch (error) {
       console.error("Error fetching username:", error);
       return '';
     }
   };
+  
 
   useEffect(() => {
     fetchReminders();

@@ -73,7 +73,7 @@ pipeline {
                     // Deploy the backend
                     bat '''
                         cd backend
-                        bat 'npm install -g pm2
+                        npm install -g pm2
                         pm2 stop reminder-backend || true
                         pm2 start server.js --name reminder-backend
                     '''

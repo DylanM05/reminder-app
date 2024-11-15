@@ -17,9 +17,12 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    if (fileExists('frontend/package.json')) {
-                        bat 'cd frontend && npm install'
+                    // Build the frontend
+                    if (fileExists('reminder-app/package.json')) {
+                        bat 'cd reminder-app && npm install && npm run build'
                     }
+
+                    // Prepare the backend (install dependencies)
                     if (fileExists('backend/package.json')) {
                         bat 'cd backend && npm install'
                     }
@@ -30,9 +33,9 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Test frontend if exists
-                    if (fileExists('frontend/package.json')) {
-                        bat 'cd frontend && npm test -- --coverage'
+                    // Run frontend tests
+                    if (fileExists('reminder-app/package.json')) {
+                        bat 'cd reminder-app && npm test -- --coverage'
                     }
                 }
             }
@@ -48,9 +51,34 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deliver') {
             steps {
-                echo "Deploying application..."
+                script {
+                    // Archive frontend and backend artifacts
+                    archiveArtifacts artifacts: 'reminder-app/build/**', fingerprint: true
+                    archiveArtifacts artifacts: 'backend/**', fingerprint: true
+                }
+            }
+        }
+
+        stage('Deploy to Dev Env') {
+            steps {
+                script {
+                    echo 'Deploying to Development Environment...'
+                    bat '''
+                        cd reminder-app/build
+                        xcopy /E /I /Y . C:\\inetpub\\wwwroot\\reminder-app-frontend
+                    '''
+
+                    // Deploy the backend
+                    bat '''
+                        cd backend
+                        pm2 stop reminder-backend || true
+                        pm2 start server.js --name reminder-backend
+                    '''
+
+                    echo 'Application deployed successfully!'
+                }
             }
         }
     }

@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/DylanM05/reminder-app.git'
+                git 'https://github.com/DylanM05/reminder-app'
             }
         }
         stage('Build') {

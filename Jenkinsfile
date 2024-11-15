@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        SONAR_TOKEN = credentials('sonar')
     }
 
     stages {
@@ -41,11 +42,7 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                            bat """
-                                sonar-scanner -Dsonar.projectBaseDir=${WORKSPACE} -Dsonar.projectKey=DylanM05_reminder-app -Dsonar.organization=dylanm05 -Dsonar.login=${SONAR_TOKEN}
-                            """
-                        }
+                        bat "sonar-scanner -Dsonar.projectBaseDir=%WORKSPACE% -Dsonar.projectKey=DylanM05_reminder-app -Dsonar.organization=dylanm05 -Dsonar.login=%SONAR_TOKEN%"
                     }
                 }
             }

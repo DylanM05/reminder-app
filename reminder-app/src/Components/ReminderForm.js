@@ -4,24 +4,24 @@ import Cookies from 'js-cookie';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
-const ReminderForm = ({ user }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState(new Date());
+const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => { 
+  const [title, setTitle] = useState(reminder ? reminder.title : '');
+  const [description, setDescription] = useState(reminder ? reminder.description : '');
+  const [startDate, setStartDate] = useState(reminder ? new Date(reminder.start) : new Date());
+  const [endDate, setEndDate] = useState(reminder ? new Date(reminder.end) : new Date());
+  const [location, setLocation] = useState(reminder ? reminder.location : { address: '' });
+  const [repeatInterval, setRepeatInterval] = useState(reminder ? reminder.repeatInterval : '');
+  const [notificationType, setNotificationType] = useState(reminder ? reminder.notification.type : 'none');
+  const [notificationTimeBefore, setNotificationTimeBefore] = useState(reminder ? reminder.notification.timeBefore : '');
+  const [tags, setTags] = useState(reminder ? reminder.tags : []);
+  const [sharedWith, setSharedWith] = useState(reminder ? reminder.sharedWith : []);
+  const [users, setUsers] = useState([]);
   const [startHour, setStartHour] = useState(12); // Hour in 12-hour format
   const [startMinute, setStartMinute] = useState(0); // Minutes
   const [startAmPm, setStartAmPm] = useState('AM'); // AM/PM
-  const [endDate, setEndDate] = useState(new Date());
   const [endHour, setEndHour] = useState(12);
   const [endMinute, setEndMinute] = useState(0);
   const [endAmPm, setEndAmPm] = useState('AM');
-  const [location, setLocation] = useState({ address: '' });
-  const [repeatInterval, setRepeatInterval] = useState('');
-  const [notificationType, setNotificationType] = useState('none');
-  const [notificationTimeBefore, setNotificationTimeBefore] = useState('2'); // Default to 2 hours before
-  const [tags, setTags] = useState([]);
-  const [sharedWith, setSharedWith] = useState([]);
-  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     // Fetch all registered users
@@ -69,13 +69,22 @@ const ReminderForm = ({ user }) => {
       tags,
       sharedWith
     };
-    await axios.post('http://localhost:5000/r/reminders', reminder);
-     window.location.reload();  
+    
+    try {
+      if (reminder) {
+        await axios.put(`http://localhost:5000/r/reminders/${reminder.id}`, reminderData);
+      } else {
+        await axios.post('http://localhost:5000/r/reminders', reminderData);
+      }
+      fetchReminders();  // Fetch reminders again
+      handleClose();  // Close the modal
+    } catch (error) {
+      console.error("Error creating/updating reminder:", error);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="container py-4">
-
       {/* Title */}
       <div className="row mb-3">
         <div className="col-md-12">
@@ -92,25 +101,22 @@ const ReminderForm = ({ user }) => {
           </div>
         </div>
       </div>
-      
       {/* Description */}
       <div className="row mb-3">
         <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="description">Description</label>
-            <textarea 
-              id="description" 
-              className="form-control" 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
-              rows="4"
+            <textarea
+              className="form-control"
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
         </div>
       </div>
-
-      {/* Start Date and Time */}
-      <div className="row mb-3">
+        {/* Start Date and Time */}
+        <div className="row mb-3">
         <div className="col-md-6">
           <div className="form-group">
             <label htmlFor="startDate">Start Date</label>

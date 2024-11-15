@@ -36,9 +36,13 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                bat 'sonar-scanner'
+                script {
+                    withSonarQubeEnv('SonarQube') { 
             }
         }
+    }
+}
+
 
         stage('Deploy') {
             steps {

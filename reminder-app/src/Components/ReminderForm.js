@@ -12,7 +12,7 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
   const [location, setLocation] = useState(reminder ? reminder.location : { address: '' });
   const [repeatInterval, setRepeatInterval] = useState(reminder ? reminder.repeatInterval : '');
   const [notificationType, setNotificationType] = useState(reminder ? reminder.notification.type : 'none');
-  const [notificationTimeBefore, setNotificationTimeBefore] = useState(reminder ? reminder.notification.timeBefore : '');
+  const [notificationTimeBefore, setNotificationTimeBefore] = useState(reminder ? reminder.notification.timeBefore : '2');
   const [tags, setTags] = useState(reminder ? reminder.tags : []);
   const [sharedWith, setSharedWith] = useState(reminder ? reminder.sharedWith : []);
   const [users, setUsers] = useState([]);
@@ -54,7 +54,7 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
       endMinute
     ));
 
-    const reminder = { 
+    const reminderData = { 
       userId, 
       title, 
       description, 
@@ -90,17 +90,18 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
         <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="title">Title</label>
-            <input 
-              id="title" 
-              type="text" 
-              className="form-control" 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
-              required 
+            <input
+              type="text"
+              className="form-control"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
             />
           </div>
         </div>
       </div>
+      
       {/* Description */}
       <div className="row mb-3">
         <div className="col-md-12">
@@ -115,8 +116,9 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
           </div>
         </div>
       </div>
-        {/* Start Date and Time */}
-        <div className="row mb-3">
+
+      {/* Start Date and Time */}
+      <div className="row mb-3">
         <div className="col-md-6">
           <div className="form-group">
             <label htmlFor="startDate">Start Date</label>
@@ -217,29 +219,31 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
 
       {/* Location */}
       <div className="row mb-3">
-        <div className="col-md-6">
+        <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="location">Location</label>
-            <input 
-              id="location" 
-              type="text" 
-              className="form-control" 
-              value={location.address} 
-              onChange={(e) => setLocation({ address: e.target.value })} 
+            <input
+              type="text"
+              className="form-control"
+              id="location"
+              value={location.address}
+              onChange={(e) => setLocation({ address: e.target.value })}
             />
           </div>
         </div>
-        
-        {/* Repeat Interval */}
-        <div className="col-md-6">
+      </div>
+
+      {/* Repeat Interval */}
+      <div className="row mb-3">
+        <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="repeatInterval">Repeat Interval</label>
-            <input 
-              id="repeatInterval" 
-              type="text" 
-              className="form-control" 
-              value={repeatInterval} 
-              onChange={(e) => setRepeatInterval(e.target.value)} 
+            <input
+              type="text"
+              className="form-control"
+              id="repeatInterval"
+              value={repeatInterval}
+              onChange={(e) => setRepeatInterval(e.target.value)}
             />
           </div>
         </div>
@@ -247,14 +251,14 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
 
       {/* Notification Type */}
       <div className="row mb-3">
-        <div className="col-md-6">
+        <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="notificationType">Notification Type</label>
-            <select 
-              id="notificationType" 
-              className="form-control" 
-              value={notificationType} 
-              onChange={(e) => setNotificationType(e.target.value)} 
+            <select
+              className="form-control"
+              id="notificationType"
+              value={notificationType}
+              onChange={(e) => setNotificationType(e.target.value)}
             >
               <option value="none">None</option>
               <option value="email">Email</option>
@@ -263,16 +267,18 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
             </select>
           </div>
         </div>
+      </div>
 
-        {/* Notification Time Before */}
-        <div className="col-md-6">
+      {/* Notification Time Before */}
+      <div className="row mb-3">
+        <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="notificationTimeBefore">Notification Time Before</label>
-            <select 
-              id="notificationTimeBefore" 
-              className="form-control" 
-              value={notificationTimeBefore} 
-              onChange={(e) => setNotificationTimeBefore(e.target.value)} 
+            <select
+              className="form-control"
+              id="notificationTimeBefore"
+              value={notificationTimeBefore}
+              onChange={(e) => setNotificationTimeBefore(e.target.value)}
             >
               <option value="default">Default: 2 hours before</option>
               <option value="none">None</option>
@@ -292,28 +298,30 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
 
       {/* Tags */}
       <div className="row mb-3">
-        <div className="col-md-6">
+        <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="tags">Tags</label>
-            <input 
-              id="tags" 
-              type="text" 
-              className="form-control" 
-              value={tags.join(', ')} 
-              onChange={(e) => setTags(e.target.value.split(',').map(tag => tag.trim()))} 
+            <input
+              type="text"
+              className="form-control"
+              id="tags"
+              value={tags.join(', ')}
+              onChange={(e) => setTags(e.target.value.split(',').map(tag => tag.trim()))}
             />
           </div>
         </div>
+      </div>
 
-        {/* Shared With */}
-        <div className="col-md-6">
+      {/* Shared With */}
+      <div className="row mb-3">
+        <div className="col-md-12">
           <div className="form-group">
             <label htmlFor="sharedWith">Shared With</label>
-            <select 
-              id="sharedWith" 
-              className="form-control" 
-              value={sharedWith} 
-              onChange={(e) => setSharedWith([e.target.value])} 
+            <select
+              className="form-control"
+              id="sharedWith"
+              value={sharedWith}
+              onChange={(e) => setSharedWith([e.target.value])}
             >
               <option value="">Select a user</option>
               {users.map(user => (
@@ -324,8 +332,7 @@ const ReminderForm = ({ reminder, fetchReminders, handleClose, user }) => {
         </div>
       </div>
 
-      {/* Submit Button */}
-      <button type="submit" className="btn btn-primary btn-lg btn-block">Create Reminder</button>
+      <button type="submit" className="btn btn-primary">{reminder ? 'Update Reminder' : 'Create Reminder'}</button>
     </form>
   );
 };

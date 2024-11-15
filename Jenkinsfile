@@ -1,6 +1,9 @@
 pipeline {
     agent any
 
+    environment {
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -37,13 +40,16 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQube') { 
-                    bat 'sonar-scanner'
+                    withSonarQubeEnv('SonarQube') {
+                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                            bat """
+                                sonar-scanner -Dsonar.projectBaseDir=${WORKSPACE} -Dsonar.projectKey=DylanM05_reminder-app -Dsonar.organization=dylanm05 -Dsonar.login=${SONAR_TOKEN}
+                            """
+                        }
+                    }
+                }
             }
         }
-    }
-}
-
 
         stage('Deploy') {
             steps {

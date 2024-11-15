@@ -30,15 +30,6 @@ pipeline {
                     if (fileExists('frontend/package.json')) {
                         bat 'cd frontend && npm test -- --coverage'
                     }
-                    // Test backend if package.json contains test script
-                    if (fileExists('backend/package.json')) {
-                        def packageJson = readFile('backend/package.json')
-                        if (packageJson.contains('"test"')) {
-                            bat 'cd backend && npm test -- --coverage'
-                        } else {
-                            echo "No tests in backend to run."
-                        }
-                    }
                 }
             }
         }

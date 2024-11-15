@@ -17,12 +17,10 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Build the frontend
                     if (fileExists('reminder-app/package.json')) {
                         bat 'cd reminder-app && npm install && npm run build'
                     }
 
-                    // Prepare the backend (install dependencies)
                     if (fileExists('backend/package.json')) {
                         bat 'cd backend && npm install'
                     }
@@ -33,7 +31,6 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    // Run frontend tests
                     if (fileExists('reminder-app/package.json')) {
                         bat 'cd reminder-app && npm test -- --coverage --passWithNoTests'
                     }
@@ -79,6 +76,34 @@ pipeline {
                     '''
 
                     echo 'Application deployed successfully!'
+                }
+            }
+        }
+
+        // Mock deploy stages
+        stage('Deploy to QAT Env') {
+            steps {
+                script {
+                    echo 'Deploying to QAT Environment...'
+                    echo 'QAT deployment mock completed.'
+                }
+            }
+        }
+
+        stage('Deploy to Staging Env') {
+            steps {
+                script {
+                    echo 'Deploying to Staging Environment...'
+                    echo 'Staging deployment mock completed.'
+                }
+            }
+        }
+
+        stage('Deploy to Production Env') {
+            steps {
+                script {
+                    echo 'Deploying to Production Environment...'
+                    echo 'Production deployment mock completed.'
                 }
             }
         }

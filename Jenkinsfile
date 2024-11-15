@@ -38,6 +38,7 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('SonarQube') { 
+                    bat 'sonar-scanner'
             }
         }
     }
